@@ -1,0 +1,82 @@
+ESP-ROM:esp32c3-api1-20210207
+Build:Feb  7 2021
+rst:0x1 (POWERON),boot:0xc (SPI_FAST_FLASH_BOOT)
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fcd5820,len:0x1574
+load:0x403cc710,len:0xc30
+load:0x403ce710,len:0x2f58
+entry 0x403cc71a
+[0;32mI (30) boot: ESP-IDF v5.4 2nd stage bootloader[0m
+[0;32mI (30) boot: compile time Jul  4 2025 15:15:44[0m
+[0;32mI (30) boot: chip revision: v0.3[0m
+[0;32mI (30) boot: efuse block revision: v1.2[0m
+[0;32mI (34) boot.esp32c3: SPI Speed      : 80MHz[0m
+[0;32mI (38) boot.esp32c3: SPI Mode       : DIO[0m
+[0;32mI (41) boot.esp32c3: SPI Flash Size : 2MB[0m
+[0;32mI (45) boot: Enabling RNG early entropy source...[0m
+[0;32mI (50) boot: Partition Table:[0m
+[0;32mI (52) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (58) boot:  0 nvs              WiFi data        01 02 00009000 00006000[0m
+[0;32mI (65) boot:  1 phy_init         RF data          01 01 0000f000 00001000[0m
+[0;32mI (72) boot:  2 factory          factory app      00 00 00010000 00100000[0m
+[0;32mI (78) boot: End of partition table[0m
+[0;32mI (81) esp_image: segment 0: paddr=00010020 vaddr=3c030020 size=0d794h ( 55188) map[0m
+[0;32mI (98) esp_image: segment 1: paddr=0001d7bc vaddr=3fc8e000 size=01454h (  5204) load[0m
+[0;32mI (99) esp_image: segment 2: paddr=0001ec18 vaddr=40380000 size=01400h (  5120) load[0m
+[0;32mI (104) esp_image: segment 3: paddr=00020020 vaddr=42000020 size=2c4b8h (181432) map[0m
+[0;32mI (140) esp_image: segment 4: paddr=0004c4e0 vaddr=40381400 size=0ca6ch ( 51820) load[0m
+[0;32mI (150) esp_image: segment 5: paddr=00058f54 vaddr=50000200 size=0001ch (    28) load[0m
+[0;32mI (154) boot: Loaded app from partition at offset 0x10000[0m
+[0;32mI (154) boot: Disabling RNG early entropy source...[0m
+[0;32mI (167) cpu_start: Unicore app[0m
+[0;32mI (176) cpu_start: Pro cpu start user code[0m
+[0;32mI (176) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (176) app_init: Application information:[0m
+[0;32mI (176) app_init: Project name:     breathalyzer[0m
+[0;32mI (180) app_init: App version:      0dfd701-dirty[0m
+[0;32mI (184) app_init: Compile time:     Jul  4 2025 15:15:21[0m
+[0;32mI (190) app_init: ELF file SHA256:  eea22fa7c...[0m
+[0;32mI (194) app_init: ESP-IDF:          v5.4[0m
+[0;32mI (197) efuse_init: Min chip rev:     v0.3[0m
+[0;32mI (201) efuse_init: Max chip rev:     v1.99 [0m
+[0;32mI (205) efuse_init: Chip rev:         v0.3[0m
+[0;32mI (209) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (215) heap_init: At 3FC903F0 len 0002FC10 (191 KiB): RAM[0m
+[0;32mI (221) heap_init: At 3FCC0000 len 0001C710 (113 KiB): Retention RAM[0m
+[0;32mI (227) heap_init: At 3FCDC710 len 00002950 (10 KiB): Retention RAM[0m
+[0;32mI (233) heap_init: At 5000021C len 00001DCC (7 KiB): RTCRAM[0m
+[0;32mI (239) spi_flash: detected chip: generic[0m
+[0;32mI (242) spi_flash: flash io: dio[0m
+[0;33mW (245) spi_flash: Detected size(4096k) larger than the size in the binary image header(2048k). Using the size in the binary image header.[0m
+[0;32mI (257) sleep_gpio: Configure to isolate all GPIO pins in sleep state[0m
+[0;32mI (263) sleep_gpio: Enable automatic switching of GPIO sleep configuration[0m
+[0;32mI (270) main_task: Started on CPU0[0m
+[0;32mI (280) main_task: Calling app_main()[0m
+[0;32mI (280) example: Initializing SD card[0m
+[0;32mI (280) example: Using SPI peripheral[0m
+[0;32mI (280) example: Mounting filesystem[0m
+[0;32mI (290) gpio: GPIO[1]| InputEn: 0| OutputEn: 1| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:0 [0m
+[0;32mI (290) sdspi_transaction: cmd=52, R1 response: command not supported[0m
+[0;32mI (340) sdspi_transaction: cmd=5, R1 response: command not supported[0m
+[0;32mI (360) example: Filesystem mounted[0m
+Name: SD
+Type: SDHC
+Speed: 20.00 MHz (limit: 20.00 MHz)
+Size: 14992MB
+CSD: ver=2, sector_size=512, capacity=30703616 read_bl_len=9
+SSR: bus_width=1
+[0;32mI (360) example: New highscore added:  GC 0.12[0m
+[1;31mE (370) example: Failed to open highscore file for adding.[0m
+[0;32mI (370) example: New highscore added:  AB 0.15[0m
+[1;31mE (380) example: Failed to open highscore file for adding.[0m
+[0;32mI (380) example: New highscore added:  CD 0.10[0m
+[1;31mE (390) example: Failed to open highscore file for adding.[0m
+[0;32mI (390) example: Reading file /sdcard/scores.txt[0m
+[0;32mI (400) example: Read from file: ' GC 0.12'[0m
+[0;32mI (400) gpio: GPIO[1]| InputEn: 1| OutputEn: 0| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:0 [0m
+[0;32mI (410) example: Card unmounted[0m
+[0;32mI (410) gpio: GPIO[6]| InputEn: 0| OutputEn: 0| OpenDrain: 0| Pullup: 1| Pulldown: 0| Intr:0 [0m
+[0;32mI (420) gpio: GPIO[4]| InputEn: 0| OutputEn: 0| OpenDrain: 0| Pullup: 1| Pulldown: 0| Intr:0 [0m
+[0;32mI (430) gpio: GPIO[5]| InputEn: 0| OutputEn: 0| OpenDrain: 0| Pullup: 1| Pulldown: 0| Intr:0 [0m
+[0;32mI (430) main_task: Returned from app_main()[0m
