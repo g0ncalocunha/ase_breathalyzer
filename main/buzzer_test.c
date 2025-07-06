@@ -8,6 +8,7 @@
 #include "driver/ledc.h"
 #include "esp_err.h"
 #include "esp_timer.h"
+#include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "sdkconfig.h"
@@ -17,12 +18,7 @@
 #define GPIO_LED          7
 #define GPIO_BUTTON       10
 
-// SD Card Reader
-#define GPIO_SD_CS        1
-#define GPIO_SD_MOSI      6
-#define GPIO_SD_CLK       5
-#define GPIO_SD_MISO      4
-
+static const char *TAG = "BUZZER";
 // // Alcohol Sensor
 // #define GPIO_ALCOHOL_SCLK 3
 // #define GPIO_ALCOHOL_DAT  2
@@ -42,7 +38,7 @@ static void periodic_timer_callback(void *arg);
 
 typedef enum {
 	OFF = 0,
-	ON = 1000
+	ON = 81
 } buzzer_duty_t;
 
 static const buzzer_duty_t buzzer_duty_levels[] = {
@@ -86,7 +82,7 @@ void buzzer_off(void) {
 
 static void configure_led(void)
 {
-    // ESP_LOGI("LED", "Configured GPIO LED!");
+    ESP_LOGI("LED", "Configured GPIO LED!");
     gpio_reset_pin(GPIO_LED);
     /* Set the GPIO as a push/pull output */
     gpio_set_direction(GPIO_LED, GPIO_MODE_OUTPUT);
@@ -96,7 +92,7 @@ static void configure_led(void)
 
 static void configure_button(void)
 {
-    // ESP_LOGI("LED", "Configured GPIO LED!");
+    ESP_LOGI("LED", "Configured GPIO LED!");
     gpio_reset_pin(GPIO_BUTTON);
     /* Set the GPIO as a push/pull output */
     gpio_set_direction(GPIO_BUTTON, GPIO_MODE_INPUT);
@@ -122,7 +118,7 @@ static void periodic_timer_callback(void* arg)
 {
     // int64_t time_since_boot = esp_timer_get_time();
     // ESP_LOGI(TAG, "Periodic timer called, time since boot: %lld us", time_since_boot);
-     buzzer_off();
+	buzzer_off();
 }
 
 
@@ -132,18 +128,35 @@ void app_main(void)
 
     /* Configure the peripheral according to the LED type */
     esp_t_init();
-		buzzer_init();
+	buzzer_init();
     configure_led();
     configure_button();
-		// gpio_set_level(GPIO_LED, s_led_state);
+	gpio_set_level(GPIO_LED, s_led_state);
 
     while (1) {
-		gpio_set_level(GPIO_BUTTON, s_led_state);	
-        // // ESP_LOGI(TAG, "Turning the LED %s!", s_led_state == true ? "ON" : "OFF");
+		// gpio_set_level(GPIO_BUTTON, s_led_state);
+		int button = gpio_get_level(GPIO_BUTTON);	
+		if (button == 0) {
+			ESP_LOGI(TAG, "Button pressed!");
+			if (s_led_state == 0) {
+				s_led_state = 1;
+				buzzer_on();
+				gpio_set_level(GPIO_LED, s_led_state);
+			} else {
+				s_led_state = 0;
+				// buzzer_off();
+				gpio_set_level(GPIO_LED, s_led_state);
+			}
+		} else {
+			// ESP_LOGI(TAG, "Button released!");
+			// buzzer_off();
+			// gpio_set_level(GPIO_LED, s_led_state);
+		}
+		ESP_LOGI(TAG, "Button state: %d", button);
+        // ESP_LOGI(TAG, "Turning the LED %s!", s_led_state == true ? "ON" : "OFF");
         // gpio_set_level(GPIO_LED, s_led_state);
-        // /* Toggle the LED state */
+        /* Toggle the LED state */
         // s_led_state = !s_led_state;
-        // vTaskDelay(1000);
-        
+        vTaskDelay(1);
     }
 }
