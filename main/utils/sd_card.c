@@ -50,6 +50,12 @@ esp_err_t s_read_file(const char *path)
 // Function to load highscores from the file
 esp_err_t load_highscores(const char *file)
 {
+    for (int i = 0; i < MAX_HIGHSCORES; i++)
+    {
+        highscores[i].score = -1.0f;
+        memset(&highscores[i].date, 0, sizeof(struct tm));
+    }
+
     FILE *f = fopen(file, "r");
     if (f == NULL)
     {

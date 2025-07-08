@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32 Breathalyzer</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@3.4.0/dist/vuetify.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@3.4.0/dist/vuetify.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.0.96/css/materialdesignicons.min.css" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <v-app>
+            <v-container fluid fill-height class="d-flex align-center justify-center">
+                <v-row align="center" justify="center" class="w-100">
+                    <v-col cols="12" sm="10" md="8" lg="6" class="text-center">
+                        <!-- Header Card -->
+                        <v-card class="mb-6 mx-auto card-uniform" color="red accent-4" dark max-width="400">
+                            <v-card-title class="text-center justify-center py-4">
+                                <h1 class="text-h4">🍺 Bafómetro ESP32</h1>
+                            </v-card-title>
+                        </v-card>
+
+                        <!-- Status Message -->
+                        <v-alert 
+                            v-if="statusMessage" 
+                            :type="statusType" 
+                            dismissible 
+                            @update:model-value="statusMessage = ''"
+                            class="mb-6 mx-auto"
+                            max-width="400"
+                        >
+                            {{ statusMessage }}
+                        </v-alert>
+
+
+
+                        <!-- Ranking Block -->
+                        <v-card class="mb-6 mx-auto card-uniform" max-width="400">
+                            <v-card-title class="purple accent-4 white--text justify-center py-4">
+                                <v-icon color="white" class="mr-2">mdi-trophy</v-icon>
+                                Ranking
+                            </v-card-title>
+                            
+                            <v-card-text class="py-4" style="min-height: 200px;">
+                                <div v-if="highscores.length === 0" class="text-center pa-4">
+                                    <v-icon size="48" color="grey">mdi-podium</v-icon>
+                                    <h3 class="text-body-1 mt-2 grey--text">Nenhum ranking ainda</h3>
+                                    <p class="text-caption grey--text">Atualize para ver os resultados!</p>
+                                </div>
+                                
+                                <div v-else>
+                                    <!-- Header row -->
+                                    <div class="ranking-header">
+                                        <span class="header-date">Date</span>
+                                        <span class="header-score">Score</span>
+                                    </div>
+                                    
+                                    <div class="ranking-container">
+                                        <div
+                                            v-for="(entry, index) in highscores"
+                                            :key="index"
+                                            class="ranking-data-row"
+                                        >
+                                            <span class="data-date">{{ entry.date || 'N/A' }}</span>
+                                            <span class="data-score">{{ formatScore(entry.score) }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </v-card-text>
+                        </v-card>
+
+                        <!-- Actions -->
+                        <v-card class="mx-auto card-uniform" max-width="400">
+                            <v-card-title class="justify-center py-4">
+                                <span class="text-h6">Controles</span>
+                            </v-card-title>
+                            <v-card-actions class="justify-center pa-4">
+                                <v-btn
+                                    @click="refreshHighscores"
+                                    color="blue accent-4"
+                                    large
+                                    block
+                                    :loading="isRefreshing"
+                                    :disabled="isRefreshing"
+                                >
+                                    <v-icon left>mdi-refresh</v-icon>
+                                    Atualizar Ranking
+                                </v-btn>
+                            </v-card-actions>
+                        </v-card>
+                    </v-col>
+                </v-row>
+            </v-container>
+        </v-app>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+        const { createVuetify } = Vuetify;
+
+        const vuetify = createVuetify({
+            theme: {
+                defaultTheme: 'light'
+            }
+        });
+
+        createApp({
+            data() {
+                return {
+                    currentReading: 0,
+                    hasReading: false,
+                    highscores: [],
+                    statusMessage: '',
+                    statusType: 'info',
+                    dangerThreshold: 0.08,
+                    isRefreshing: false
+                }
+            },
+            methods: {
+                async refreshHighscores() {
+                    this.isRefreshing = true;
+                    
+                    try {
+                        const response = await fetch('/api/v1/highscores');
+                        const data = await response.json();
+                        
+                        // Sort by score in descending order
+                        this.highscores = data.sort((a, b) => b.score - a.score);
+                        
+                        // Don't show status message for updates
+                        
+                    } catch (error) {
+                        console.error('Error fetching highscores:', error);
+                        this.showStatusMessage('Erro ao carregar ranking.', 'error');
+                    } finally {
+                        this.isRefreshing = false;
+                    }
+                },
+
+                getRankColor(index) {
+                    if (index === 0) return 'gold';
+                    if (index === 1) return 'silver';
+                    if (index === 2) return 'brown';
+                    return 'grey';
+                },
+
+                getBACColor(value) {
+                    if (value > this.dangerThreshold) return 'red';
+                    if (value > this.dangerThreshold * 0.7) return 'orange';
+                    return 'green';
+                },
+
+                formatScore(score) {
+                    if (score === null || score === undefined) return 'N/A';
+                    return parseFloat(score).toFixed(3);
+                },
+
+                showStatusMessage(message, type) {
+                    this.statusMessage = message;
+                    this.statusType = type;
+                    setTimeout(() => {
+                        this.statusMessage = '';
+                    }, 5000);
+                }
+            },
+
+            mounted() {
+                // Initial highscores load
+                this.refreshHighscores();
+                
+                // Check highscores periodically
+                setInterval(() => {
+                    if (!this.isRefreshing) {
+                        this.refreshHighscores();
+                    }
+                }, 60000); // Check every minute
+                
+                this.showStatusMessage('Sistema de Ranking ESP32 inicializado!', 'info');
+            }
+        }).use(vuetify).mount('#app');
+    </script>
+
+    <style>
+        /* Center everything */
+        .v-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Uniform card styling */
+        .card-uniform {
+            width: 100% !important;
+            max-width: 400px !important;
+            margin: 0 auto !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+        }
+
+        /* Reading card specific sizing */
+        .reading-card {
+            max-width: 300px !important;
+            min-height: 80px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+
+        .reading-display {
+            text-align: center;
+            padding: 8px 0;
+        }
+
+        .reading-prompt {
+            text-align: center;
+            padding: 8px 0;
+        }
+
+        .v-card {
+            border-radius: 15px !important;
+            margin: 0 auto !important;
+        }
+
+        .v-btn {
+            border-radius: 25px !important;
+        }
+
+        .v-chip {
+            font-weight: bold;
+        }
+
+        /* Ensure consistent spacing */
+        .mb-6 {
+            margin-bottom: 24px !important;
+        }
+
+        /* Ranking table styling */
+        .ranking-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f5f5f5;
+            padding: 8px 16px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+        }
+
+        .header-date, .header-score {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .ranking-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ranking-data-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 16px;
+            border-bottom: 1px solid #e0e0e0;
+            min-height: 40px;
+        }
+
+        .ranking-data-row:last-child {
+            border-bottom: none;
+        }
+
+        .data-date {
+            font-size: 14px;
+            text-align: left;
+        }
+
+        .data-score {
+            font-size: 14px;
+            font-weight: bold;
+            text-align: right;
+        }
+
+        /* Ensure measurement list displays properly */
+        .v-list {
+            display: flex !important;
+            flex-direction: column !important;
+            width: 100% !important;
+        }
+
+        .v-list-item {
+            width: 100% !important;
+            flex: none !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 6px 16px !important;
+            margin: 0 !important;
+        }
+
+        .v-list-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Ranking row specific styling */
+        .ranking-row {
+            display: flex !important;
+            width: 100% !important;
+            justify-content: space-between !important;
+        }
+
+        .ranking-row span {
+            display: block !important;
+            width: 50% !important;
+        }
+
+        /* Responsive design */
+        @media (max-width: 600px) {
+            .card-uniform {
+                margin: 0 16px !important;
+                max-width: calc(100% - 32px) !important;
+            }
+        }
+    </style>
+</body>
+</html>
